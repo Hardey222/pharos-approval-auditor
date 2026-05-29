@@ -130,24 +130,22 @@ function extractPairs(logs) {
 
 // --- Verify current allowance for each pair, drop zeros ---
 async function verifyAllowances(client, walletAddress, pairs) {
+  const BATCH = 25;
   const active = [];
-  for (const pair of pairs) {
-    // Skip self-approvals
-    if (pair.spender.toLowerCase() === walletAddress.toLowerCase()) continue;
-    const allowance = await safeRead(
-      client,
-      pair.token,
-      erc20Abi,
-      "allowance",
-      [walletAddress, pair.spender],
+  for (let i = 0; i < pairs.length; i += BATCH) {
+    const batch = pairs.slice(i, i + BATCH);
+    process.stderr.write(`\r  Verifying allowances... ${Math.min(i + BATCH, pairs.length)}/${pairs.length}    `);
+    const results = await Promise.all(
+      batch.map(async (pair) => {
+        if (pair.spender.toLowerCase() === walletAddress.toLowerCase()) return null;
+        const allowance = await safeRead(client, pair.token, erc20Abi, "allowance", [walletAddress, pair.spender]);
+        if (allowance === null || allowance === 0n) return null;
+        return { ...pair, allowance };
+      }),
     );
-    if (allowance === null) {
-      // Broken contract; record but skip
-      continue;
-    }
-    if (allowance === 0n) continue;
-    active.push({ ...pair, allowance });
+    for (const r of results) if (r) active.push(r);
   }
+  process.stderr.write("\n");
   return active;
 }
 
