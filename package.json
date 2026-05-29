@@ -1,0 +1,28 @@
+{
+  "name": "pharos-approval-auditor",
+  "version": "0.1.0",
+  "description": "An Agent Skill that audits every ERC-20 approval a wallet has granted on Pharos, flags dangerous unlimited approvals, calculates exposure per token, and generates revoke commands",
+  "type": "module",
+  "main": "scripts/audit_approvals.js",
+  "scripts": {
+    "audit": "node scripts/audit_approvals.js"
+  },
+  "keywords": [
+    "pharos",
+    "agent-skill",
+    "security",
+    "approval",
+    "audit",
+    "wallet-safety",
+    "erc-20",
+    "revoke",
+    "web3"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
